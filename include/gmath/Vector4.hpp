@@ -3,8 +3,10 @@
 
 #include "VectorBase.hpp"
 #include <utility>
-#include <initializer_list>
 #include <cmath>
+#include <initializer_list>
+#include "Vector3.hpp"
+#include "Vector2.hpp"
 
 namespace gmath {
 	template<class T>
@@ -18,26 +20,28 @@ namespace gmath {
 		T& w = Base::_data[3];
 
 		template<class Ts>
-		Vector4(Ts s) : Base(s, s, s, s) {}
+		constexpr Vector4(Ts s) : Base(s, s, s, s) {}
 		template<class Tx, class Ty, class Tz, class Tw>
-		Vector4(Tx x, Ty y, Tz z, Tw w) : Base(x, y, z, w) {}
+		constexpr Vector4(Tx x, Ty y, Tz z, Tw w) : Base(x, y, z, w) {}
 		template<class To>
-		Vector4(const Vector4<To>& o) :
+		constexpr Vector4(const Vector4<To>& o) :
 			x(o.x), y(o.y), z(o.z), w(o.w) {}
-		Vector4(Vector4&& o) :
+		constexpr Vector4(Vector4&& o) :
 			x(std::move(o.x)),
 			y(std::move(o.y)),
 			z(std::move(o.z)),
 			w(std::move(o.w)) {}
 		
-		Vector4& operator =(T o) {
+		template<class To>
+		Vector4& operator =(To o) {
 			x = o;
 			y = o;
 			z = o;
 			w = o;
 			return *this;
 		}
-		Vector4& operator =(const Vector4& o) {
+		template<class To>
+		Vector4& operator =(const Vector4<To>& o) {
 			x = o.x;
 			y = o.y;
 			z = o.z;
@@ -66,6 +70,41 @@ namespace gmath {
 
 		auto normalized() {
 			return *this / magnitude();
+		}
+
+		template<int x>
+		constexpr T swizzle() const {
+			return *(Base::cbegin() + x);
+		}
+
+		template<int x, int y>
+		constexpr Vector2<T> swizzle() const {
+			auto p = Base::cbegin();
+			return {
+				*(p + x),
+				*(p + y)
+			};
+		}
+
+		template<int x, int y, int z>
+		constexpr Vector3<T> swizzle() const {
+			auto p = Base::cbegin();
+			return {
+				*(p + x),
+				*(p + y),
+				*(p + z)
+			};
+		}
+
+		template<int x, int y, int z, int w>
+		constexpr Vector4 swizzle() const {
+			auto p = Base::cbegin();
+			return {
+				*(p + x),
+				*(p + y),
+				*(p + z),
+				*(p + w)
+			};
 		}
 	};
 
@@ -106,6 +145,10 @@ namespace gmath {
 	template<class Ts, class Tv> \
 	auto operator _(Ts s, const Vector4<Tv>& v) { \
 		return Vector4<decltype(s _ v.x)>(s _ v.x, s _ v.y, s _ v.z, s _ v.w); \
+	} \
+	template<class Ts, class Tv> \
+	auto operator _(Ts s, const std::array<Tv, 4>& v) { \
+		return Vector4<decltype(s _ v[0])>(s _ v.x, s _ v.y, s _ v.z, s _ v.w); \
 	}
 
 	MAKE_OP(+)

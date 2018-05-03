@@ -1,7 +1,7 @@
 #ifndef GMATH_VECTORBASE_HPP
 #define GMATH_VECTORBASE_HPP
 
-#include <initializer_list>
+#include <array>
 
 namespace gmath {
 	template<class T, size_t N>
@@ -11,7 +11,8 @@ namespace gmath {
 
 	public:
 		template<class... Ta>
-		VectorBase(Ta... args) : _data{args...} {}
+		constexpr VectorBase(Ta... args) : _data{args...} {}
+		constexpr VectorBase(std::array<T, N> args) : _data(args) {}
 
 		constexpr T& operator [](size_t i) { return _data[i]; }
 		constexpr const T& operator [](size_t i) const { return _data[i]; }
